@@ -7,11 +7,7 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public PlayerInputActions playerControls;
-    private InputAction move;
-    private InputAction tankMove;
-    private InputAction run;
-
+    private PlayerInputs playerInputs;
     private CharacterController controller;
     private Camera mainCamera;
 
@@ -28,17 +24,9 @@ public class PlayerMovement : MonoBehaviour
     #region UNITY_EVENTS
 
     private void Awake() {
-        playerControls=new PlayerInputActions();
-        controller=GetComponent<CharacterController>();
+        playerInputs = GetComponent<PlayerInputs>();
+        controller =GetComponent<CharacterController>();
         mainCamera = Camera.main;
-    }
-
-    public void OnEnable() {
-        EnableInputs();
-    }
-
-    private void OnDisable() {
-        DisableInputs();
     }
 
     private void Update() {
@@ -49,28 +37,8 @@ public class PlayerMovement : MonoBehaviour
 
     #endregion
 
-    #region INPUTS
-
-    private void EnableInputs() {
-        move = playerControls.Player.Move;
-        tankMove = playerControls.Player.TankMove;
-        run = playerControls.Player.Run;
-
-        move.Enable();
-        tankMove.Enable();
-        run.Enable();
-    }
-
-    private void DisableInputs () {
-        move.Disable();
-        tankMove.Disable();
-        run.Enable();
-    }
-
-    #endregion
-
     private void NormalControlsUpdate() {
-        var localDir = move.ReadValue<Vector2>();
+        var localDir = playerInputs.Move.ReadValue<Vector2>();
         if (localDir != lastDir) {
             lastDir = localDir;
             dir = mainCamera.transform.TransformDirection(lastDir);
@@ -86,8 +54,8 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void TankControlsUpdate() {
-        var localDir = tankMove.ReadValue<Vector2>();
-        float speed = run.ReadValue<float>()==0 ? walkSpeed : runSpeed;
+        var localDir = playerInputs.TankMove.ReadValue<Vector2>();
+        float speed = playerInputs.Run.ReadValue<float>()==0 ? walkSpeed : runSpeed;
         localDir.Normalize();
         controller.Move(transform.forward * localDir.y * speed * Time.deltaTime);
         transform.Rotate(transform.up,rotationSpeed * localDir.x * Time.deltaTime);
